@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>File Upload and Line Edit</title>
+</head>
+<body>
+    <h1>File Upload and Line Edit</h1>
+    <label for="fileUrl">URL of the File:</label>
+    <input type="text" id="fileUrl" placeholder="Enter URL of the file">
+    <button onclick="fetchFile()">Fetch and Edit</button>
+    <br>
+    <textarea id="fileContent" rows="10" cols="50"></textarea>
+    <br>
+    <label for="replacement1">Replacement for Keyword 1:</label>
+    <input type="text" id="replacement1">
+    <br>
+    <label for="replacement2">Replacement for Keyword 2:</label>
+    <input type="text" id="replacement2">
+    <br>
+    <label for="replacement3">Replacement for Keyword 3:</label>
+    <input type="text" id="replacement3">
+    <br>
+    <label for="replacement4">Replacement for Keyword 4:</label>
+    <input type="text" id="replacement4">
+    <br>
+    <label for="replacement5">Replacement for Keyword 5:</label>
+    <input type="text" id="replacement5">
+    <br>
+    <button onclick="editLines()">Edit Lines</button>
+    <button onclick="downloadEditedFile()">Download Edited File</button>
+
+    <script>
+        let editedContent = "";
+        const predefinedKeywords = ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"];
+
+        function fetchFile() {
+            const fileUrl = document.getElementById('fileUrl').value;
+
+            if (!fileUrl) {
+                alert('Please enter the URL of the file you want to edit.');
+                return;
+            }
+
+            fetch(fileUrl)
+                .then(response => response.text())
+                .then(contents => {
+                    document.getElementById('fileContent').value = contents;
+                    editedContent = contents;
+                })
+                .catch(error => {
+                    alert('Error fetching the file. Please check the URL and try again.');
+                    console.error(error);
+                });
+        }
+
+        function editLines() {
+            const replacements = {};
+
+            for (let i = 1; i <= 5; i++) {
+                const replacement = document.getElementById(`replacement${i}`).value.trim();
+                if (replacement !== "") {
+                    replacements[predefinedKeywords[i - 1]] = replacement;
+                }
+            }
+
+            const fileContent = document.getElementById('fileContent').value;
+            const lines = fileContent.split('\n');
+
+            for (let i = 0; i < lines.length; i++) {
+                for (const keyword in replacements) {
+                    if (lines[i].includes(keyword)) {
+                        lines[i] = lines[i].replace(keyword, replacements[keyword]);
+                    }
+                }
+            }
+
+            editedContent = lines.join('\n');
+            document.getElementById('fileContent').value = editedContent;
+            alert('Lines edited successfully!');
+        }
+
+        function downloadEditedFile() {
+            if (!editedContent) {
+                alert('No edited content to download. Please fetch a file and edit it first.');
+                return;
+            }
+
+            const blob = new Blob([editedContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'edited_file.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
